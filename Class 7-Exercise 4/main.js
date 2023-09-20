@@ -10,10 +10,58 @@
 
 class Subject {
 	constructor() {
-		this.observers = [];
+	  this.observers = [];
 	}
-
+  
 	addObserver(observer) {
-		// TODO: Add observer to the list
-        this.observers.push(observer);
+	  this.observers.push(observer);
 	}
+  
+	removeObserver(observer) {
+	  this.observers = this.observers.filter(obs => obs !== observer);
+	}
+  
+	notifyObservers(data) {
+	  this.observers.forEach(observer => {
+		observer.update(data);
+	  });
+	}
+  
+	async fetchAndNotify() {
+	  const url = 'https://jsonplaceholder.typicode.com/posts?_limit=10';
+  
+	  try {
+		const response = await fetch(url);
+		if (!response.ok) {
+		  throw new Error(`Failed to fetch data. Status: ${response.status}`);
+		}
+		const data = await response.json();
+		this.notifyObservers(data);
+	  } catch (error) {
+		this.notifyObservers(error.message);
+	  }
+	}
+  }
+  
+  class Observer {
+	update(data) {
+	  if (typeof data === 'string') {
+	  } else if (Array.isArray(data) && data.length > 0) {
+		const [firstPost] = data;
+		console.log('First Post Title:', firstPost.title);
+	  }
+	}
+  }
+  
+  // Instantiate the Subject
+  const subject = new Subject();
+  
+  // Add multiple observers
+  const observer1 = new Observer();
+  const observer2 = new Observer();
+  subject.addObserver(observer1);
+  subject.addObserver(observer2);
+  
+  // Call fetchAndNotify
+  subject.fetchAndNotify();
+  
